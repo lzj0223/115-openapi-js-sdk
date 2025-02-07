@@ -1,6 +1,6 @@
 # 115-openapi-js-sdk
 
-115 openapi 接口sdk 持续完善中
+115生活 115网盘 openapi 接口sdk 持续完善中
 
 ### 开放平台地址
 
