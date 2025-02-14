@@ -526,3 +526,60 @@ type ApiRbReverseResponse = BaseResponse<{
     }
 }>
 
+
+type ApiAuthDeviceCodeResponse = BaseResponse<{
+    // 设备码
+    uid?: string,
+    // 校验用的时间戳，轮询设备码状态用到
+    time?: number,
+    // 二维码内容，第三方客户端需要根据此内容生成设备二维码，提供给115客户端扫码
+    qrcode?: string,
+    // 校验用的签名，轮询设备码状态用到
+    sign?: string
+}>
+
+
+// 轮询二维码状态输出
+type ApiQrCodeStatusResponse = {
+    /** 状态码 (0:二维码无效，结束轮询; 1:继续轮询) */
+    state?: number;
+    /** 业务状态码 */
+    code?: number;
+    /** 错误信息 */
+    message?: string;
+    /** 115客户端扫码或者输入设备码后才有值 */
+    data?: any;
+    /** 操作提示信息 */
+    msg?: string;
+    /**
+     * 二维码状态
+     * 1:扫码成功，等待确认
+     * 2:确认登录/授权，结束轮询
+     */
+    status?: number;
+    /** 接口版本号 */
+    version?: string;
+}
+
+type ApiAccessTokenResponse = BaseResponse<any> & {
+    /**
+     * 访问令牌
+     * @description 用于访问资源接口的凭证
+     */
+    access_token?: string;
+    /**
+     * 刷新令牌
+     * @description 用于刷新access_token，有效期1年
+     */
+    refresh_token?: string;
+    /**
+     * 过期时间
+     * @description access_token有效期，单位秒
+     * @example 2592000
+     */
+    expires_in?: number;
+    /** 错误信息 */
+    error?: string;
+    /** 错误码 */
+    errno?: number;
+}

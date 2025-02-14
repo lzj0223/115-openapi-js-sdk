@@ -1,4 +1,28 @@
 export default {
+
+    /**
+     * 获取设备码和二维码内容
+     * @link https://www.yuque.com/115yun/open/shtpzfhewv5nag11
+     */
+    AUTH_DEVICE_CODE: '/open/authDeviceCode',
+    /**
+     * 轮询二维码状态接口
+     * @link  https://www.yuque.com/115yun/open/shtpzfhewv5nag11
+     */
+    AUTH_QRCODE_STATUS: 'https://qrcodeapi.115.com/get/status',
+    /**
+     * 用设备码换取 access_token
+     * @link  https://www.yuque.com/115yun/open/shtpzfhewv5nag11
+     */
+    AUTH_CODE_TO_TOKEN: '/open/deviceCodeToToken',
+    /**
+     * 刷新 access_token
+     * 请勿频繁刷新，否则列入频控。
+     * @link  https://www.yuque.com/115yun/open/shtpzfhewv5nag11
+     */
+    AUTH_REFRESH_TOKEN: '/open/refreshToken',
+
+
     /**
      * 获取用户空间和vip信息
      * @link https://www.yuque.com/115yun/open/ot1litggzxa1czww
@@ -87,4 +111,11 @@ export default {
      * @link https://www.yuque.com/115yun/open/gwtof85nmboulrce
      */
     RB_DEL: '/open/rb/del',
+
+
+    /**
+     * 获取开放平台产品列表扫描跳转链接地址
+     * @link https://www.yuque.com/115yun/open/yifbvxan6szytyng
+     */
+    VIP_QR_URL: '/open/vip/qr_url',
 }
