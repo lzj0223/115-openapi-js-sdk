@@ -1,6 +1,6 @@
 import axios, {AxiosInstance, AxiosResponse} from 'axios';
 import ApiUrls from "./api-urls";
-import crypto from 'crypto';
+import {generateCodeChallenge, generateCodeVerifier} from "./util";
 
 
 export interface Open115Config {
@@ -27,18 +27,27 @@ export class Open115SDK {
         this.token = config.token;
         this.clientId = config.clientId;
         this.client = axios.create({
-            baseURL: config.baseURL || 'https://api.115.com',
+            baseURL: config.baseURL || ApiUrls.DOMAIN,
             headers: {
                 'Content-Type': 'application/json',
-                ...(this.token ? {'Authorization': `Bearer ${this.token}`} : {})
             }
         });
+        this.client.interceptors.request.use((config) => {
+            if (this.token) {
+                config.headers['Authorization'] = `Bearer ${this.token}`;
+            }
+            return config;
+        })
 
         // 添加响应拦截器处理错误
         this.client.interceptors.response.use(
-            response => response,
+            response => {
+                console.log(response.config.url + ' ' + JSON.stringify(response.config.data));
+                return response
+            },
             error => {
                 if (error.response) {
+                    console.error(error.response.config);
                     throw new Open115Error(`API请求失败: ${error.response.status} ${error.response.data?.message || '未知错误'}`);
                 }
                 throw new Open115Error('网络请求失败');
@@ -52,7 +61,7 @@ export class Open115SDK {
      */
     setToken(token: string): void {
         this.token = token;
-        this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        //this.client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
 
     /**
@@ -60,19 +69,17 @@ export class Open115SDK {
      * 使用接口返回的 data.qrcode 作为二维码的内容，在第三方客户端展示二维码，用于给115客户端扫码授权。
      */
     async authDeviceCode(): Promise<ApiAuthDeviceCodeResponse> {
-        this.codeVerifier = crypto.randomBytes(32).toString('hex');
-        const codeChallenge = crypto.createHash('sha256').update(this.codeVerifier).digest('base64url');
+        this.codeVerifier = await generateCodeVerifier();
+        const codeChallenge = await generateCodeChallenge(this.codeVerifier);
         const resp = await this.client.post(ApiUrls.AUTH_DEVICE_CODE, {
+            client_id: this.clientId,
+            code_challenge: codeChallenge,
+            code_challenge_method: 'sha256'
+        }, {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: {
-                client_id: this.clientId,
-                code_challenge: codeChallenge,
-                code_challenge_method: 'sh256'
             }
         });
-
         return resp.data;
     }
 
@@ -95,15 +102,17 @@ export class Open115SDK {
      * @param uid 二维码ID/设备码
      */
     async authDeviceCodeToToken(uid: string): Promise<ApiAccessTokenResponse> {
-        const resp: AxiosResponse<ApiAccessTokenResponse> = await this.client.post(ApiUrls.AUTH_CODE_TO_TOKEN, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: {
+        const resp: AxiosResponse<ApiAccessTokenResponse> = await this.client.post(
+            ApiUrls.AUTH_CODE_TO_TOKEN,
+            {
                 uid: uid,
                 code_verifier: this.codeVerifier,
-            }
-        });
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+            });
 
         if (resp.data.access_token) {
             this.setToken(resp.data.access_token);
@@ -118,12 +127,23 @@ export class Open115SDK {
      * @param refresh_token 二维码ID/设备码
      */
     async authRefreshToken(refresh_token: string): Promise<ApiAccessTokenResponse> {
-        const resp = await this.client.post(ApiUrls.AUTH_CODE_TO_TOKEN, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+        const resp = await this.client.post(ApiUrls.AUTH_CODE_TO_TOKEN,
+            {
+                refresh_token
             },
-            body: {refresh_token}
-        });
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+            });
+        return resp.data;
+    }
+
+    /**
+     * 获取用户空间和vip信息
+     */
+    async userInfo(): Promise<ApiUserInfoResponse> {
+        const resp = await this.client.get(ApiUrls.USER_INFO);
         return resp.data;
     }
 
@@ -256,7 +276,7 @@ export class Open115SDK {
      * @param defaultProductId 默认产品ID
      */
     async vipQrUrl(openDevice: string, defaultProductId: string = ''): Promise<BaseResponse<{ qrcode_url: string }>> {
-        const resp = await this.client.get(ApiUrls.RB_DEL, {
+        const resp = await this.client.get(ApiUrls.VIP_QR_URL, {
             params: {
                 open_device: openDevice,
                 default_product_id: defaultProductId,

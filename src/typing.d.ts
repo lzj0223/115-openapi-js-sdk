@@ -548,17 +548,18 @@ type ApiQrCodeStatusResponse = {
     /** 错误信息 */
     message?: string;
     /** 115客户端扫码或者输入设备码后才有值 */
-    data?: any;
-    /** 操作提示信息 */
-    msg?: string;
-    /**
-     * 二维码状态
-     * 1:扫码成功，等待确认
-     * 2:确认登录/授权，结束轮询
-     */
-    status?: number;
-    /** 接口版本号 */
-    version?: string;
+    data?: {
+        /** 操作提示信息 */
+        msg?: string;
+        /**
+         * 二维码状态
+         * 1:扫码成功，等待确认
+         * 2:确认登录/授权，结束轮询
+         */
+        status?: number;
+        /** 接口版本号 */
+        version?: string;
+    };
 }
 
 type ApiAccessTokenResponse = BaseResponse<any> & {

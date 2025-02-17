@@ -1,26 +1,31 @@
 export default {
 
     /**
+     * 基础域名
+     */
+    DOMAIN: 'https://proapi.115.com/',
+
+    /**
      * 获取设备码和二维码内容
      * @link https://www.yuque.com/115yun/open/shtpzfhewv5nag11
      */
-    AUTH_DEVICE_CODE: '/open/authDeviceCode',
+    AUTH_DEVICE_CODE: 'https://passportapi.115.com/open/authDeviceCode',
     /**
      * 轮询二维码状态接口
      * @link  https://www.yuque.com/115yun/open/shtpzfhewv5nag11
      */
-    AUTH_QRCODE_STATUS: 'https://qrcodeapi.115.com/get/status',
+    AUTH_QRCODE_STATUS: 'https://qrcodeapi.115.com/get/status/',
     /**
      * 用设备码换取 access_token
      * @link  https://www.yuque.com/115yun/open/shtpzfhewv5nag11
      */
-    AUTH_CODE_TO_TOKEN: '/open/deviceCodeToToken',
+    AUTH_CODE_TO_TOKEN: 'https://passportapi.115.com/open/deviceCodeToToken',
     /**
      * 刷新 access_token
      * 请勿频繁刷新，否则列入频控。
      * @link  https://www.yuque.com/115yun/open/shtpzfhewv5nag11
      */
-    AUTH_REFRESH_TOKEN: '/open/refreshToken',
+    AUTH_REFRESH_TOKEN: 'https://passportapi.115.com/open/refreshToken',
 
 
     /**
