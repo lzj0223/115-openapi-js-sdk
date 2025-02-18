@@ -29,7 +29,7 @@ export class Open115SDK {
         this.client = axios.create({
             baseURL: config.baseURL || ApiUrls.DOMAIN,
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
             }
         });
         this.client.interceptors.request.use((config) => {
@@ -42,12 +42,10 @@ export class Open115SDK {
         // 添加响应拦截器处理错误
         this.client.interceptors.response.use(
             response => {
-                console.log(response.config.url + ' ' + JSON.stringify(response.config.data));
                 return response
             },
             error => {
                 if (error.response) {
-                    console.error(error.response.config);
                     throw new Open115Error(`API请求失败: ${error.response.status} ${error.response.data?.message || '未知错误'}`);
                 }
                 throw new Open115Error('网络请求失败');
@@ -75,10 +73,6 @@ export class Open115SDK {
             client_id: this.clientId,
             code_challenge: codeChallenge,
             code_challenge_method: 'sha256'
-        }, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            }
         });
         return resp.data;
     }
@@ -107,11 +101,6 @@ export class Open115SDK {
             {
                 uid: uid,
                 code_verifier: this.codeVerifier,
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                }
             });
 
         if (resp.data.access_token) {
@@ -130,12 +119,12 @@ export class Open115SDK {
         const resp = await this.client.post(ApiUrls.AUTH_CODE_TO_TOKEN,
             {
                 refresh_token
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                }
             });
+
+        if (resp.data.access_token) {
+            this.setToken(resp.data.access_token);
+        }
+
         return resp.data;
     }
 
@@ -152,7 +141,7 @@ export class Open115SDK {
      * @param body
      */
     async folderAdd(body: ApiFolderAddRequestBody): Promise<ApiFolderAddResponse> {
-        const resp = await this.client.post(ApiUrls.FOLDER_ADD, {body,})
+        const resp = await this.client.post(ApiUrls.FOLDER_ADD, body)
         return resp.data;
     }
 
@@ -189,7 +178,7 @@ export class Open115SDK {
      * @param body
      */
     async fileCopy(body: ApiUFileCopyRequestBody): Promise<BaseResponse<any[]>> {
-        const resp = await this.client.post(ApiUrls.U_FILE_COPY, {body})
+        const resp = await this.client.post(ApiUrls.U_FILE_COPY, body)
         return resp.data
     }
 
@@ -198,7 +187,7 @@ export class Open115SDK {
      * @param body
      */
     async fileMove(body: ApiUFileMoveRequestBody): Promise<BaseResponse<any[]>> {
-        const resp = await this.client.post(ApiUrls.U_FILE_MOVE, {body})
+        const resp = await this.client.post(ApiUrls.U_FILE_MOVE, body)
         return resp.data
     }
 
@@ -207,7 +196,7 @@ export class Open115SDK {
      * @param pick_code  文件提取码
      */
     async fileDownUrl(pick_code: string): Promise<ApiUFileDownUrlResponse> {
-        const resp = await this.client.post(ApiUrls.U_FILE_DOWN_URL, {body: {pick_code}})
+        const resp = await this.client.post(ApiUrls.U_FILE_DOWN_URL, {pick_code})
         return resp.data
     }
 
@@ -216,7 +205,7 @@ export class Open115SDK {
      * @param body
      */
     async fileUpdate(body: ApiUFileUpdateRequestBody): Promise<ApiUFileUpdateResponse> {
-        const resp = await this.client.post(ApiUrls.U_FILE_UPDATE, {body})
+        const resp = await this.client.post(ApiUrls.U_FILE_UPDATE, body)
         return resp.data
     }
 
@@ -225,7 +214,7 @@ export class Open115SDK {
      * @param body
      */
     async fileDelete(body: ApiUFileDeleteRequestBody): Promise<ApiUFileDeleteResponse> {
-        const resp = await this.client.post(ApiUrls.U_FILE_DELETE, {body})
+        const resp = await this.client.post(ApiUrls.U_FILE_DELETE, body)
 
         return resp.data
     }
@@ -249,9 +238,7 @@ export class Open115SDK {
      */
     async rbRevert(tld: string | string[]): Promise<ApiRbReverseResponse> {
         const resp = await this.client.post(ApiUrls.RB_REVERT, {
-            body: {
-                tld: Array.isArray(tld) ? tld.join(',') : tld,
-            }
+            tld: Array.isArray(tld) ? tld.join(',') : tld,
         })
         return resp.data
     }
@@ -262,9 +249,7 @@ export class Open115SDK {
      */
     async rbDel(tld: string | string[]): Promise<BaseResponse<string[]>> {
         const resp = await this.client.post(ApiUrls.RB_DEL, {
-            body: {
-                tld: Array.isArray(tld) ? tld.join(',') : tld,
-            }
+            tld: Array.isArray(tld) ? tld.join(',') : tld,
         })
 
         return resp.data

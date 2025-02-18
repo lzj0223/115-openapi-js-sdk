@@ -1,7 +1,8 @@
 import Open115SDK from "../src"
 import QRCode from 'qrcode';
+import './index'
 
-const sdk = new Open115SDK({clientId: 'app id'})
+const sdk = new Open115SDK({clientId: process.env.APP_ID as string});
 
 
 sdk.authDeviceCode().then(async (result) => {
